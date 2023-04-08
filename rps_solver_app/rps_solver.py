@@ -13,6 +13,8 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 import logging
 
+import datetime
+
 
 from dotenv import dotenv_values
 
@@ -21,9 +23,9 @@ config = dotenv_values(".env.public")
 class GameResult(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     player: str
-    player_name: str
     enemy: str
     result: Optional[int] = None
+    created_at: str
 
 engine = create_engine("sqlite:///database.db")
 
@@ -54,7 +56,7 @@ def fight_one(agent1_path: str, agent2_path: str):
 def list_agents():
     agentlist = base_path.rglob('*')
 
-    newest_agents = [agent for agent in agentlist if 'current' in str(agent) and agent.is_file()]
+    newest_agents = [agent for agent in agentlist if agent.is_file()]
 
     return newest_agents
 
@@ -70,14 +72,14 @@ def fight(player_id: int, agent_path: Path):
         if enemy_agent == agent_path:
             continue
 
-        print(f"fight {player_id} vs player {player_id}")
-        logging.info(f"fight {player_id} vs player {enemy_agent}")
+        print(f"fight {player_id} vs player {enemy_agent}")
+        logging.info(f"fight {player_id} vs player {enemy_agent.parent} with {enemy_agent.stem}")
 
         result = fight_one(agent_path, enemy_agent)
 
         logging.info(f'result {result}')
 
-        results[f'{player_id}_{agent_path.stem}-{enemy_agent.stem}'] = result
+        results[f'{player_id}/{agent_path.name}-{enemy_agent.parent.name}/{enemy_agent.name}'] = result
 
     logging.info(results)
 
@@ -93,10 +95,9 @@ def read_results():
 
 
 @app.get("/players/{player_id}")
-def read_item(player_id: str, player_name: Union[str, None] = None, filename: Union[str, None] = None):
-    player_name = player_name or player_id
+def read_item(player_id: str, filename: Union[str, None] = None):
 
-    full_agent_path = base_path / filename
+    full_agent_path = base_path / Path(player_id) / filename
 
     logging.info(f'Fight {player_id} with {full_agent_path}')
 
@@ -104,11 +105,11 @@ def read_item(player_id: str, player_name: Union[str, None] = None, filename: Un
 
     with Session(engine) as session:
         for result_enemy, result_value in results.items():
-            game_result = GameResult(player=player_id, player_name=player_name, enemy=result_enemy, result=result_value)
+            game_result = GameResult(player=player_id, enemy=result_enemy, result=result_value, created_at=datetime.datetime.now().isoformat())
             session.add(game_result)
         session.commit()
 
-    return {"item_id": player_id, "agent": filename, "result": list(results.values())}
+    return {"item_id": player_id, "agent": filename, "result": results}
 
 @app.get("/treasure_hunt")
 def treasure_hunt(client_info: str, location: str):
