@@ -5,4 +5,10 @@ pygame
 scipy
 termcolor
 vec-noise
+
+# evil_agent.py
+pandas
+structlog
+
+# dev
 jupyterlab
