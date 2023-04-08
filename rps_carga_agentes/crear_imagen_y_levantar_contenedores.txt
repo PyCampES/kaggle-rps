@@ -1,0 +1,8 @@
+
+
+paso 1: creamos una imagen
+docker build -t carga_de_agente_v1 .
+
+
+paso 2: arrancar esa imagen con el docker compose
+docker-compose up -d 

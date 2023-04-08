@@ -1,0 +1,21 @@
+version: '3.3'
+services:
+    carga_de_agentes:
+        container_name: carga_de_agente_v1
+        ports:
+            - '20001:80'
+        volumes:
+            - '/etc/timezone:/etc/timezone:ro'
+            - '/etc/localtime:/etc/localtime:ro'
+            - C:\workspace\pycamp\AGENTES:/agentes
+        environment:
+            - RPS_SOLVER=http://localhost/
+        image: carga_de_agente_v1
+        restart: unless-stopped
+        logging:
+          driver: json-file
+          options:
+            max-size: 90m
+            max-file: '3'
+
+
