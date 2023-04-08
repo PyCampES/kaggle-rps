@@ -1,0 +1,8 @@
+kaggle_environments
+fastapi
+uvicorn[standard]
+pettingzoo
+vec_noise
+sqlmodel
+python-telegram-bot
+python-dotenv
