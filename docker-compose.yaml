@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  upload_agents:
+    build:
+      context: rps_carga_agentes
+    environment:
+      AGENT_DIR: /agents
+    ports:
+      - 8000:80
+    volumes:
+      - ./live_agents:/agents
+  tournament_runner:
+    build:
+      context: tournament_runner
+    environment:
+      COMPETE_AGENT_DIR: /usr/src/compete_agents
+      AGENT_DIR: /live_agents
+    ports:
+      - 8001:8000
+    volumes:
+      - ./live_agents:/live_agents
+      - ./compete_agents:/usr/src/compete_agents

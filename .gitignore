@@ -131,3 +131,7 @@ dmypy.json
 .DS_Store
 .env.*
 database.db
+
+# live agent files
+live_agents/
+compete_agents/
