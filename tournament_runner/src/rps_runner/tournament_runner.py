@@ -37,6 +37,8 @@ def as_compete_path_live(agent: str) -> Path:
     assert COMPETE_AGENT_DIR, "COMPETE_AGENT_DIR not set"
     return Path(COMPETE_AGENT_DIR) / f"{agent}.py"
 
+DEFAULT_AGENT_PATH = as_import_path("rocks")
+
 
 def as_compete_import(agent_path: Path):
     return f"compete_agents.{agent_path.stem}.agent"
@@ -49,7 +51,9 @@ def import_agents(agent_dir: Path, is_compete_path: bool = False) -> Agents:
             continue
         import_path = as_compete_import(agent_path) if is_compete_path else as_import_path(agent_name)
         agent_func = locate(import_path)
-        assert agent_func, f"unable to find agent @ {import_path}"
+        if not agent_func:
+            logger.warning(f"unable to find agent @ {import_path}")
+            agent_func = locate(DEFAULT_AGENT_PATH)
         name_to_func[agent_name] = agent_func
     return cast(Agents, name_to_func)
 
