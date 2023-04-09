@@ -47,10 +47,10 @@ def constant_play_agent_1(observation, configuration):
 
 agent = constant_play_agent_1
 ```
-2. go to <http://{CLUSTER_URL}:8000/docs> and use the upload endpoint
+2. go to <http://192.168.5.172/docs> and use the upload endpoint
 
 # How to run a tournament?
-1. go to <http://{CLUSTER_URL}:8001/run>
+1. go to <http://192.168.5.172:8080/run>
 
 # How to see the result
-1. <http://{CLUSTER_URL}:8001>
+1. <http://192.168.5.172:8080/>
