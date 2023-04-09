@@ -1,6 +1,9 @@
 ## para el endpoint de carga del archivo
+import json
 import logging
 import shutil
+import os
+from pathlib import Path
 
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,6 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+AGENT_DIR = os.getenv("AGENT_DIR", "agents")
 
 def dame_conjunto_de_archivos(folder):
     """ me da una lista de nombre de archivo """
@@ -46,7 +50,7 @@ def dame_conjunto_de_archivos(folder):
                 continue
 
     return conjunto_archivos
-import os
+
 
 def obtener_directorios(path):
     directorios = []
@@ -64,35 +68,25 @@ def obtener_directorios(path):
 # def read_item(player_id: str, player_name: Union[str, None] = None, filename: Union[str, None] = None):
 
 
-def lee_claves():
-    try:
-        with open('agentes'+os.sep+'claves.csv') as f:
-            dict = {}
-            for line in f:
-                key, value = line.strip().split(',')
-                dict[key] = value
+def claves_path() -> Path:
+    full_path = Path(AGENT_DIR +os.sep + "claves.json")
+    if not full_path.exists():
+        full_path.write_text("{}")
+    return full_path
 
-        return dict
-    except:
-        return {}
+
+def lee_claves():
+    path = claves_path()
+    return json.loads(path.read_text())
 
 @app.post("/registro/{player_id}/{password}")
 def carga_un_agente(player_id:str,password:str):
-
-    try:
-        dicc_claves = lee_claves()
-    except:
-        m = open('agentes'+os.sep+"claves.csv","w")
-        m.close()
-        dicc_claves = lee_claves()
-
+    dicc_claves = lee_claves()
     if player_id in dicc_claves.keys():
         return "Usuario ya registrado, utilice otron nombre de usuario"
-
-    m = open('agentes'+os.sep+"claves.csv","a")
-    m.write(player_id+","+password+"\n")
-    m.close()
-
+    dicc_claves[player_id] = password
+    dumped = json.dumps(dicc_claves)
+    claves_path().write_text(dumped)
     return "Usuario registrado con exito!!"
 
 
@@ -108,13 +102,11 @@ def carga_un_agente(player_id:str,clave:str,file: UploadFile = File(...)):
     else:
         return "Usuario no registrado"
 
-    list_of_players_folders = obtener_directorios("agentes")
+    list_of_players_folders = obtener_directorios(AGENT_DIR)
 
-    directorio_player = "agentes"+os.sep+player_id
 
-    if player_id not in list_of_players_folders:
-        os.mkdir(directorio_player)
-    
+    directorio_player = Path(AGENT_DIR+os.sep+player_id)
+    directorio_player.mkdir(parents=True, exist_ok=True)
     file_path = os.path.join(directorio_player, file.filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -127,12 +119,12 @@ def carga_un_agente(player_id:str,clave:str,file: UploadFile = File(...)):
 @app.get("/lista_agentes/{player_id}/")
 def carga_un_agente(player_id:str):
 
-    list_of_players_folders = obtener_directorios("agentes")
+    list_of_players_folders = obtener_directorios(AGENT_DIR)
 
     if player_id not in list_of_players_folders:
         return "0 agentes para este jugador, carge un agente!!"
 
-    directorio_player = "agentes"+os.sep+player_id
+    directorio_player = AGENT_DIR+os.sep+player_id
 
     lista_de_agentes = dame_conjunto_de_archivos(directorio_player)
 
