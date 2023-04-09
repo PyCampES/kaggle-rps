@@ -1,42 +1,17 @@
-
-from typing import List, Optional, Union
-from enum import Enum
-import math
-import os
-
-import pandas as pd
-
 ## para el endpoint de carga del archivo
+import logging
 import shutil
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from typing import Callable
-#####################################
 
-import os
-
-from fastapi import FastAPI, BackgroundTasks, Query, Body, HTTPException, File, UploadFile
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import FileResponse
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 
-
+#####################################
 ##############################################################################
 # https://fastapi-utils.davidmontague.xyz/user-guide/timing-middleware/
-from starlette.requests import Request
-from starlette.staticfiles import StaticFiles
-from starlette.testclient import TestClient
-
-#from fastapi_utils.timing import add_timing_middleware, record_timing
-
-import logging
+# from fastapi_utils.timing import add_timing_middleware, record_timing
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 ##############################################################################
-
-import os
 
 app = FastAPI()
 
